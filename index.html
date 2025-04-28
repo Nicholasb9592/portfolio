@@ -360,7 +360,216 @@ p.shift {
     <!-- Begin Programming Examples -->
     <div id="Programming" class="tabcontent">
         <h2>Programming Project 1</h2>
+	    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <h2>JavaScript Calculator</h2>
+    <form id="calcForm">
+        <label>Operand 1:
+            <input type="text" id="operand1">
+            <span class="error" id="error1"></span>
+        </label>
+        <br><br>
+
+        <label>Operator:
+            <input type="radio" name="operator" value="+" checked> +
+            <input type="radio" name="operator" value="-"> -
+            <input type="radio" name="operator" value="*"> *
+            <input type="radio" name="operator" value="/"> /
+            <span class="error" id="errorOp"></span>
+        </label>
+        <br><br>
+
+        <label>Operand 2:
+            <input type="text" id="operand2">
+            <span class="error" id="error2"></span>
+        </label>
+        <br><br>
+
+        <label>Result:
+            <input type="text" id="result" readonly>
+        </label>
+        <br><br>
+
+        <button type="button" onclick="calculate()">Calculate</button>
+        <button type="button" onclick="clearForm()">Clear</button>
+    </form>
+
+    <script>
+    function calculate() {
+    let operand1 = document.getElementById("operand1").value.trim();
+    let operand2 = document.getElementById("operand2").value.trim();
+    let operator = document.querySelector('input[name="operator"]:checked');
+    let resultField = document.getElementById("result");
+
+    let error1 = document.getElementById("error1");
+    let error2 = document.getElementById("error2");
+    let errorOp = document.getElementById("errorOp");
+
+    error1.innerText = "";
+    error2.innerText = "";
+    errorOp.innerText = "";
+
+    let valid = true;
+    if (operand1 === "" || isNaN(operand1)) {
+        error1.innerText = " Operand 1 is Required";
+        valid = false;
+    }
+    if (operand2 === "" || isNaN(operand2)) {
+        error2.innerText = " Operand 2 is Required";
+        valid = false;
+    }
+    if (!operator) {
+        errorOp.innerText = " Operator is Required";
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    let num1 = parseFloat(operand1);
+    let num2 = parseFloat(operand2);
+    let op = operator.value;
+    let result;
+
+    switch (op) {
+        case "+":
+            result = num1 + num2;
+            break;
+        case "-":
+            result = num1 - num2;
+            break;
+        case "*":
+            result = num1 * num2;
+            break;
+        case "/":
+            if (num2 === 0) {
+                error2.innerText = " Cannot divide by zero";
+                return;
+            }
+            result = num1 / num2;
+            break;
+        default:
+            return;
+    }
+
+    resultField.value = result;
+}
+
+function clearForm() {
+    document.getElementById("calcForm").reset();
+    document.getElementById("error1").innerText = "";
+    document.getElementById("error2").innerText = "";
+    document.getElementById("errorOp").innerText = "";
+    document.getElementById("result").value = "";
+}
+    </script>
+</body>
+</html>
         <h2>Programming Project 2</h2>
+	    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Value History</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Currency Value History</h1>
+    <label for="baseCurrency">Base Currency:</label>
+    <select id="baseCurrency" required>
+        <option value="">Select an Currency...</option>
+        <option value="USD">US Dollar</option>
+        <option value="EUR">Euro</option>
+        <option value="GBP">British Pound</option>
+        <option value="JPY">Japanese Yen</option>
+        <option value="AUD">Australian Dollar</option>
+    </select>
+    <span id="baseError" class="error"></span>
+    
+    <label for="targetCurrency">Convert to Currency:</label>
+    <select id="targetCurrency" required>
+        <option value="">Select an Currency...</option>
+        <option value="USD">US Dollar</option>
+        <option value="EUR">Euro</option>
+        <option value="GBP">British Pound</option>
+        <option value="JPY">Japanese Yen</option>
+        <option value="AUD">Australian Dollar</option>
+    </select>
+    <span id="targetError" class="error"></span>
+    
+    <label for="fromDate">From Date:</label>
+    <input type="date" id="fromDate" required>
+    <span id="fromDateError" class="error"></span>
+    
+    <label for="toDate">To Date:</label>
+    <input type="date" id="toDate" required>
+    <span id="toDateError" class="error"></span>
+    
+    <button id="fetchData">Show Results</button>
+    <button id="clearData">Clear</button>
+    
+    <canvas id="chartjs-0"></canvas>
+    
+    <script>
+        $(document).ready(function () {
+            $('#fetchData').click(function () {
+                let baseCurrency = $('#baseCurrency').val();
+                let targetCurrency = $('#targetCurrency').val();
+                let fromDate = $('#fromDate').val();
+                let toDate = $('#toDate').val();
+                
+                $('.error').text('');
+                if (!baseCurrency) $('#baseError').text('Base Currency is Required');
+                if (!targetCurrency) $('#targetError').text('Convert To Currency is Required');
+                if (!fromDate) $('#fromDateError').text('From Date is Required');
+                if (!toDate) $('#toDateError').text('To Date is Required');
+                if (!baseCurrency || !targetCurrency || !fromDate || !toDate) return;
+                
+                let apiKey = "udrp6eqhfjgppNSulwTH0DAHwgDjN2Cj";
+                let url = `https://api.polygon.io/v2/aggs/ticker/C:${baseCurrency}${targetCurrency}/range/1/day/${fromDate}/${toDate}?apiKey=${apiKey}`;
+                $.getJSON(url, function (data) {
+                    let dates = data.results.map(res => new Date(res.t).toLocaleDateString());
+                    let values = data.results.map(res => res.c);
+                    
+                    var ctx = document.getElementById("chartjs-0").getContext("2d");
+                    new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: dates,
+                            datasets: [{
+                                label: "One USD to GBP",
+                                data: values,
+                                fill: false,
+                                borderColor: "teal",
+                                tension: 0.1
+                            }]
+                        },
+                        options: { responsive: true }
+                    });
+                });
+            });
+            
+            $('#clearData').click(function () {
+                $('#baseCurrency, #targetCurrency').val('');
+                $('#fromDate, #toDate').val('');
+                $('.error').text('');
+            });
+        });
+    </script>
+</body>
+</html>
     </div>
 
     <!-- Begin Soft Skills -->
