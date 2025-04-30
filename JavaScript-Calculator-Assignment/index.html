@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <h2>JavaScript Calculator</h2>
+    <form id="calcForm">
+        <label>Operand 1:
+            <input type="text" id="operand1">
+            <span class="error" id="error1"></span>
+        </label>
+        <br><br>
+
+        <label>Operator:
+            <input type="radio" name="operator" value="+" checked> +
+            <input type="radio" name="operator" value="-"> -
+            <input type="radio" name="operator" value="*"> *
+            <input type="radio" name="operator" value="/"> /
+            <span class="error" id="errorOp"></span>
+        </label>
+        <br><br>
+
+        <label>Operand 2:
+            <input type="text" id="operand2">
+            <span class="error" id="error2"></span>
+        </label>
+        <br><br>
+
+        <label>Result:
+            <input type="text" id="result" readonly>
+        </label>
+        <br><br>
+
+        <button type="button" onclick="calculate()">Calculate</button>
+        <button type="button" onclick="clearForm()">Clear</button>
+    </form>
+
+    <script>
+    function calculate() {
+    let operand1 = document.getElementById("operand1").value.trim();
+    let operand2 = document.getElementById("operand2").value.trim();
+    let operator = document.querySelector('input[name="operator"]:checked');
+    let resultField = document.getElementById("result");
+
+    let error1 = document.getElementById("error1");
+    let error2 = document.getElementById("error2");
+    let errorOp = document.getElementById("errorOp");
+
+    error1.innerText = "";
+    error2.innerText = "";
+    errorOp.innerText = "";
+
+    let valid = true;
+    if (operand1 === "" || isNaN(operand1)) {
+        error1.innerText = " Operand 1 is Required";
+        valid = false;
+    }
+    if (operand2 === "" || isNaN(operand2)) {
+        error2.innerText = " Operand 2 is Required";
+        valid = false;
+    }
+    if (!operator) {
+        errorOp.innerText = " Operator is Required";
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    let num1 = parseFloat(operand1);
+    let num2 = parseFloat(operand2);
+    let op = operator.value;
+    let result;
+
+    switch (op) {
+        case "+":
+            result = num1 + num2;
+            break;
+        case "-":
+            result = num1 - num2;
+            break;
+        case "*":
+            result = num1 * num2;
+            break;
+        case "/":
+            if (num2 === 0) {
+                error2.innerText = " Cannot divide by zero";
+                return;
+            }
+            result = num1 / num2;
+            break;
+        default:
+            return;
+    }
+
+    resultField.value = result;
+}
+
+function clearForm() {
+    document.getElementById("calcForm").reset();
+    document.getElementById("error1").innerText = "";
+    document.getElementById("error2").innerText = "";
+    document.getElementById("errorOp").innerText = "";
+    document.getElementById("result").value = "";
+}
+    </script>
+</body>
+</html>
