@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+1.
+<form action="https://www.w3schools.com/action_page.php" method="POST">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+    <br><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    <br><br>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" placeholder="example@example.com">
+    <br><br>
+
+    <label for="age">Age:</label>
+    <input type="number" id="age" name="age" min="1" max="100">
+    <br><br>
+
+    <p>Gender:</p>
+    <input type="radio" id="male" name="gender" value="male">
+    <label for="male">Male</label>
+    <input type="radio" id="female" name="gender" value="female">
+    <label for="female">Female</label>
+    <br><br>
+
+    <label for="dob">Date of Birth:</label>
+    <input type="date" id="dob" name="dob">
+    <br><br>
+
+    <label for="country">Country:</label>
+    <select id="country" name="country">
+        <option value="us">United States</option>
+        <option value="ca">Canada</option>
+        <option value="uk">United Kingdom</option>
+    </select>
+    <br><br>
+
+    <input type="submit" value="Submit">
+</form>
+2.
+<head>
+    <style>
+        #gameContainer {
+            width: 300px;
+            height: 100px;
+            background-color: #f0f0f0;
+            border: 2px solid #333;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        #target {
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            position: absolute;
+            top: 35px;
+            left: 0;
+        }
+        #hitZone {
+            width: 50px;
+            height: 100%;
+            background-color: rgba(0, 255, 0, 0.5);
+            position: absolute;
+            right: 0;
+        }
+        #controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <div id="target"></div>
+    <div id="hitZone"></div>
+</div>
+
+<div id="controls">
+    <button onclick="startGame()">Start</button>
+    <button onclick="stopGame()">Stop</button>
+    <button onclick="resetGame()">Reset</button>
+    <p id="score">Score: 0</p>
+</div>
+
+<script>
+    const target = document.getElementById('target');
+    const hitZone = document.getElementById('hitZone');
+    const scoreDisplay = document.getElementById('score');
+    let gameInterval, moveDirection = 1, score = 0;
+
+    function startGame() {
+        clearTimeout(gameInterval);
+        gameInterval = setInterval(moveTarget, 20);
+    }
+
+    function moveTarget() {
+        let targetPosition = target.offsetLeft;
+        if (targetPosition >= 270 || targetPosition <= 0) {
+            moveDirection *= -1;
+        }
+        target.style.left = targetPosition + moveDirection * 5 + 'px';
+    }
+
+    function stopGame() {
+        clearTimeout(gameInterval);
+        const targetPosition = target.getBoundingClientRect();
+        const hitZonePosition = hitZone.getBoundingClientRect();
+
+        if (targetPosition.right >= hitZonePosition.left && targetPosition.left <= hitZonePosition.right) {
+            score += 20;
+            alert("+20 points");
+        } else {
+            score -= 10;
+            alert("-10 points");
+        }
+        scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    function resetGame() {
+        clearTimeout(gameInterval);
+        target.style.left = '0px';
+        scoreDisplay.textContent = `Score: ${score}`;
+    }
+</script>
+(If the square is glitching out when you press start, press reset then start again until it runs normally.)
+</body>
+</body>
+</html>
