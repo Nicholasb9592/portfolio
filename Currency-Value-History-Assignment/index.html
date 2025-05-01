@@ -1,172 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Currency Value History</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .error { color: red; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Currency Value History</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .error { color: red; font-size: 0.9em; margin-left: 10px; }
+    label { display: block; margin: 10px 0; }
+    canvas { margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h1>Currency Value History</h1>
-    <form id="currencyForm">
-        <label>Base Currency:
-            <select id="baseCurrency">
-                <option value="">Select an Currency...</option>
-                <option value="USD">US Dollar</option>
-                <option value="GBP">British Pound</option>
-                <option value="EUR">Euro</option>
-                <option value="JPY">Japanese Yen</option>
-                <option value="AUD">Australian Dollar</option>
-            </select>
-            <span class="error" id="baseError"></span>
-        </label><br><br>
+  <h1>Currency Value History</h1>
 
-        <label>Convert to Currency:
-            <select id="convertCurrency">
-                <option value="">Select an Currency...</option>
-                <option value="USD">US Dollar</option>
-                <option value="GBP">British Pound</option>
-                <option value="EUR">Euro</option>
-                <option value="JPY">Japanese Yen</option>
-                <option value="AUD">Australian Dollar</option>
-            </select>
-            <span class="error" id="convertError"></span>
-        </label><br><br>
+  <label>Base Currency:
+    <select id="baseCurrency">
+      <option value="">Select Currency...</option>
+    </select>
+    <span id="baseError" class="error"></span>
+  </label>
 
-        <label>From Date:
-            <input type="date" id="fromDate">
-            <span class="error" id="fromDateError"></span>
-        </label><br><br>
+  <label>Convert to Currency:
+    <select id="convertCurrency">
+      <option value="">Select Currency...</option>
+    </select>
+    <span id="convertError" class="error"></span>
+  </label>
 
-        <label>To Date:
-            <input type="date" id="toDate">
-            <span class="error" id="toDateError"></span>
-        </label><br><br>
+  <label>From Date:
+    <input type="date" id="fromDate">
+    <span id="fromDateError" class="error"></span>
+  </label>
 
-        <button type="button" onclick="fetchCurrencyData()">Show Results</button>
-        <button type="button" onclick="clearForm()">Clear</button>
-    </form>
+  <label>To Date:
+    <input type="date" id="toDate">
+    <span id="toDateError" class="error"></span>
+  </label>
 
-    <canvas id="chartjs-0" width="600" height="400"></canvas>
+  <button onclick="fetchCurrencyData()">Show Results</button>
+  <button onclick="clearForm()">Clear</button>
 
-    <script>
+  <canvas id="chartjs-0" width="600" height="400"></canvas>
+
+  <script>
     const apiKey = "CSFfrrII5w_8ex_CkKZols6VhoHpsbFP";
-let chart = null;
+    let chart = null;
 
-function fetchCurrencyData() {
-    clearErrors();
+    const currencies = [
+      { code: "USD", name: "US Dollar" },
+      { code: "EUR", name: "Euro" },
+      { code: "JPY", name: "Japanese Yen" },
+      { code: "GBP", name: "Great Britain Pound" },
+      { code: "CAD", name: "Canadian Dollar" }
+    ];
 
-    const baseCurrency = document.getElementById("baseCurrency").value;
-    const convertCurrency = document.getElementById("convertCurrency").value;
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
+    window.onload = function () {
+      const baseSelect = document.getElementById("baseCurrency");
+      const convertSelect = document.getElementById("convertCurrency");
 
-    let valid = true;
+      currencies.forEach(currency => {
+        baseSelect.add(new Option(currency.name, currency.code));
+        convertSelect.add(new Option(currency.name, currency.code));
+      });
+    };
 
-    if (!baseCurrency) {
+    function fetchCurrencyData() {
+      clearErrors();
+
+      const baseCurrency = document.getElementById("baseCurrency").value;
+      const convertCurrency = document.getElementById("convertCurrency").value;
+      const fromDate = document.getElementById("fromDate").value;
+      const toDate = document.getElementById("toDate").value;
+
+      let valid = true;
+
+      if (!baseCurrency) {
         document.getElementById("baseError").innerText = "Base Currency is Required";
         valid = false;
-    }
-
-    if (!convertCurrency) {
+      }
+      if (!convertCurrency) {
         document.getElementById("convertError").innerText = "Convert To Currency is Required";
         valid = false;
-    }
-
-    if (!fromDate) {
+      }
+      if (!fromDate) {
         document.getElementById("fromDateError").innerText = "From Date is Required";
         valid = false;
-    }
-
-    if (!toDate) {
+      }
+      if (!toDate) {
         document.getElementById("toDateError").innerText = "To Date is Required";
         valid = false;
-    }
+      }
 
-    if (!valid) return;
+      if (!valid) return;
 
-    const url = `https://api.polygon.io/v2/aggs/ticker/C:${baseCurrency}${convertCurrency}/range/1/day/${fromDate}/${toDate}?adjusted=true&sort=asc&limit=120&apiKey=${apiKey}`;
+      const url = `https://api.polygon.io/v2/aggs/ticker/C:${baseCurrency}${convertCurrency}/range/1/day/${fromDate}/${toDate}?adjusted=true&sort=asc&limit=120&apiKey=${apiKey}`;
 
-    fetch(url)
+      fetch(url)
         .then(response => response.json())
         .then(data => {
-            if (!data.results || data.results.length === 0) {
-                alert("No data available for selected dates.");
-                return;
-            }
+          if (!data.results || data.results.length === 0) {
+            alert("No data available for selected dates.");
+            return;
+          }
 
-            const values = data.results.map(item => item.c); // Closing price
-            const dates = data.results.map(item => {
-                const d = new Date(item.t);
-                return `${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
-            });
+          const values = data.results.map(item => item.c);
+          const dates = data.results.map(item => {
+            const d = new Date(item.t);
+            return `${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+          });
 
-            drawChart(dates, values, baseCurrency, convertCurrency);
+          drawChart(dates, values, baseCurrency, convertCurrency);
         })
         .catch(error => {
-            console.error("API Error:", error);
-            alert("Failed to retrieve data.");
+          console.error("API Error:", error);
+          alert("Failed to retrieve data.");
         });
-}
-
-function drawChart(dates, values, baseCurrency, convertCurrency) {
-    const ctx = document.getElementById("chartjs-0").getContext("2d");
-
-    if (chart) {
-        chart.destroy(); // clear previous chart
     }
 
-    chart = new Chart(ctx, {
+    function drawChart(dates, values, baseCurrency, convertCurrency) {
+      const ctx = document.getElementById("chartjs-0").getContext("2d");
+
+      if (chart) {
+        chart.destroy();
+      }
+
+      chart = new Chart(ctx, {
         type: "line",
         data: {
-            labels: dates,
-            datasets: [{
-                label: `One ${baseCurrency} to ${convertCurrency}`,
-                data: values,
-                fill: false,
-                borderColor: "teal",
-                tension: 0.1,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
+          labels: dates,
+          datasets: [{
+            label: `One ${baseCurrency} to ${convertCurrency}`,
+            data: values,
+            fill: false,
+            borderColor: "teal",
+            tension: 0.1,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
         },
         options: {
-            responsive: false,
-            maintainAspectRatio: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: `${baseCurrency} to ${convertCurrency}`,
-                    font: {
-                        size: 18
-                    }
-                }
+          responsive: false,
+          maintainAspectRatio: true,
+          plugins: {
+            title: {
+              display: true,
+              text: `${baseCurrency} to ${convertCurrency}`,
+              font: { size: 18 }
             }
+          }
         }
-    });
-}
+      });
+    }
 
-function clearErrors() {
-    document.getElementById("baseError").innerText = "";
-    document.getElementById("convertError").innerText = "";
-    document.getElementById("fromDateError").innerText = "";
-    document.getElementById("toDateError").innerText = "";
-}
+    function clearErrors() {
+      document.getElementById("baseError").innerText = "";
+      document.getElementById("convertError").innerText = "";
+      document.getElementById("fromDateError").innerText = "";
+      document.getElementById("toDateError").innerText = "";
+    }
 
-function clearForm() {
-    document.getElementById("baseCurrency").value = "";
-    document.getElementById("convertCurrency").value = "";
-    document.getElementById("fromDate").value = "";
-    document.getElementById("toDate").value = "";
+    function clearForm() {
+      document.getElementById("baseCurrency").value = "";
+      document.getElementById("convertCurrency").value = "";
+      document.getElementById("fromDate").value = "";
+      document.getElementById("toDate").value = "";
+      clearErrors();
 
-    clearErrors();
-
-    if (chart) {
+      if (chart) {
         chart.destroy();
         chart = null;
+      }
     }
-}
-    </script>
+  </script>
 </body>
 </html>
